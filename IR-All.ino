@@ -25,8 +25,8 @@ NTPClient timeClient(ntpUDP, "0.id.pool.ntp.org", 25200,60000);
 CTBot myBot;
   
 String ssid = "Discrete Mathematics";     // REPLACE mySSID WITH YOUR WIFI SSID
-String pass = "masuk123"; // REPLACE myPassword YOUR WIFI PASSWORD, IF ANY
-String token = "1909239646:AAHH5xvMy9_JAoYnLnFuF7WiH_RxKvVloQg"; // sinyalgaib_bot
+String pass = "xxx"; // REPLACE myPassword YOUR WIFI PASSWORD, IF ANY
+String token = "xxx"; // sinyalgaib_bot
 
 const uint16_t kIrLed = 14;  // ESP8266 GPIO pin IR LED to use. 14 (D5) //
 
