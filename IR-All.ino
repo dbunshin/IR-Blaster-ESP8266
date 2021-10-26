@@ -14,9 +14,14 @@
 #include <IRtext.h>
 #include <IRutils.h>
 
+// LED INDICATOR PIN D6
+#define LED2W D5
+#define LED1B D6
+#define LED3G D7
+
 //-----------------------------
 // DHT11
-#define DHTPIN D4    // Digital pin connected to the DHT sensor at D4//
+#define DHTPIN D3    // Digital pin connected to the DHT sensor at D3//
 #define DHTTYPE DHT11   // DHT 11
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -25,10 +30,11 @@ NTPClient timeClient(ntpUDP, "0.id.pool.ntp.org", 25200,60000);
 CTBot myBot;
   
 String ssid = "xxxx";     // REPLACE mySSID WITH YOUR WIFI SSID
-String pass = "xxx"; // REPLACE myPassword YOUR WIFI PASSWORD, IF ANY
-String token = "xxx"; 
+String pass = "xxxx"; // REPLACE myPassword YOUR WIFI PASSWORD, IF ANY
+String token = "xxxx"; // sinyalgaib_bot
 
-const uint16_t kIrLed = 14;  // ESP8266 GPIO pin IR LED to use. 14 (D5) //
+//const uint16_t kIrLed = 2;  // ESP8266 GPIO pin IR LED to use. 2 (D4) //
+const uint16_t kIrLed = 5;  // ESP8266 GPIO pin IR LED to use. 5 (D1) //
 
 IRsend irsend(kIrLed);  // Set the GPIO to be used to sending the message.
 
@@ -69,8 +75,7 @@ uint16_t rawDataAll16[137] = {9884, 9738,  9912, 9756,  4690, 2428,  408, 328,  
 // An IR detector/demodulator is connected to GPIO pin 14
 // e.g. D5 on a NodeMCU board.
 // Note: GPIO 16 won't work on the ESP8266 as it does not have interrupts.
-const uint16_t kRecvPin = 5; 
-//D1
+const uint16_t kRecvPin = 4; // IR RECEIVER PIN D2
 
 // The Serial connection baud rate.
 // i.e. Status message will be sent to the PC at this baud rate.
@@ -155,6 +160,11 @@ decode_results results;  // Somewhere to store the results
 
 // This section of code runs only once at start-up.
 void setup() {
+// LED
+  pinMode(LED1B, OUTPUT);
+  pinMode(LED2W, OUTPUT);
+  pinMode(LED3G, OUTPUT);
+  
 //--
   timeClient.begin();
   irsend.begin();
@@ -221,8 +231,17 @@ void loop()
   // if there is an incoming message...
   if (myBot.getNewMessage(msg)) {
 
+/*  // restart esp8266 -- not working
+  if (msg.text.equalsIgnoreCase("/restart")) {
+      delay (200);
+      ulang();
+      Serial.println(F("Restarting.."));
+    }
+*/
+    
     // remote telegram
       if (msg.text.equalsIgnoreCase("/Status")) {
+      LedKedip();
       delay (200);
       myBot.sendMessage(msg.sender.id, tempstat);  
       delay (200);    
@@ -249,46 +268,69 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/26")) {
       myBot.sendMessage(msg.sender.id, "Set to 26C");
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW);      
       irsend.sendRaw(rawData26c, 137,38); // set to 26C @38khz
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Set to 26C"));
     }
 
       else if (msg.text.equalsIgnoreCase("/28")) {
-      myBot.sendMessage(msg.sender.id, "Set to 28C");    
+      myBot.sendMessage(msg.sender.id, "Set to 28C");  
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW);        
       irsend.sendRaw(rawData28c, 137,38); // set to 28C @38khz
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Set to 28C"));
     }
 
       else if (msg.text.equalsIgnoreCase("/30")) {
       myBot.sendMessage(msg.sender.id, "Set to 30C");    
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW);      
       irsend.sendRaw(rawData30c, 137,38); // set to 30C @38khz
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Set to 30C"));
     }
 
       else if (msg.text.equalsIgnoreCase("/all16")) {
       myBot.sendMessage(msg.sender.id, "Set to All 16C");    
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW); 
       irsend.sendRaw(rawDataAll16, 137,38); // set to 30C @38khz
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Set to All 16C"));
     }
         
       else if (msg.text.equalsIgnoreCase("/16")) {
       myBot.sendMessage(msg.sender.id, "Set to 16C");     
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW); 
       irsend.sendRaw(rawData16c, 137,38); // set to 16C @38khz
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Set to 16C"));
     }
 
       else if (msg.text.equalsIgnoreCase("/turbon")) {
       myBot.sendMessage(msg.sender.id, "Turbo On");     
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW); 
       irsend.sendRaw(rawDataTurboOn, 137,38);
       delay (200);
       Serial.println(F("Turbo On"));
@@ -297,6 +339,9 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/turboff")) {
       myBot.sendMessage(msg.sender.id, "Turbo Off");     
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW); 
       irsend.sendRaw(rawDataTurboOff, 137,38); 
       delay (200);
       Serial.println(F("Turbo Off"));
@@ -305,6 +350,9 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/swingon")) {
       myBot.sendMessage(msg.sender.id, "Swing On");     
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW); 
       irsend.sendRaw(rawDataSwingOn, 137,38); // 1 kondisi
       delay (200);
       Serial.println(F("Swing On"));
@@ -313,6 +361,9 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/swingoff")) {
       myBot.sendMessage(msg.sender.id, "Swing Off");     
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW); 
       irsend.sendRaw(rawDataSwingOff, 137,38); // 1 kondisi
       delay (200);
       Serial.println(F("Swing Off"));
@@ -321,16 +372,26 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/fan")) {
       myBot.sendMessage(msg.sender.id, "Mode Fan");     
       delay (200);
+      digitalWrite(LED3G,HIGH);
+      delay (1000);
+      digitalWrite(LED3G,LOW); 
       irsend.sendRaw(rawDataFan, 137,38); 
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Mode Fan"));
     }
     
       else if (msg.text.equalsIgnoreCase("/cold")) {
       myBot.sendMessage(msg.sender.id, "Mode Cold");     
       delay (200);
+      digitalWrite(LED1B,HIGH);
+      digitalWrite(LED2W,HIGH);
+      delay (1000);
+      digitalWrite(LED1B,LOW);
+      digitalWrite(LED2W,LOW);
       irsend.sendRaw(rawDataCold, 137,38); 
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Mode Cold"));
     }  
     
@@ -338,6 +399,9 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/TvOn")) {
       myBot.sendMessage(msg.sender.id, "Tv On");     
       delay (200);
+      digitalWrite(LED2W,HIGH);
+      delay (1000);
+      digitalWrite(LED2W,LOW);
       irsend.sendRaw(rawDataTvOnOff, 155,38); 
       delay (200);
       Serial.println(F("Tv On"));
@@ -345,6 +409,9 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/TvOff")) {
       myBot.sendMessage(msg.sender.id, "Tv Off");     
       delay (200);
+      digitalWrite(LED2W,HIGH);
+      delay (1000);
+      digitalWrite(LED2W,LOW);      
       irsend.sendRaw(rawDataTvOnOff, 155,38); 
       delay (200);
       Serial.println(F("Tv Off"));
@@ -353,6 +420,9 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/TvHome")) {
       myBot.sendMessage(msg.sender.id, "Tv Home");     
       delay (200);
+      digitalWrite(LED2W,HIGH);
+      delay (1000);
+      digitalWrite(LED2W,LOW);      
       irsend.sendRaw(rawDataTvHome, 207,38); 
       delay (200);
       Serial.println(F("Tv Home"));
@@ -362,6 +432,9 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/LBTon")) {
       myBot.sendMessage(msg.sender.id, "Lampu BT On");     
       delay (200);
+      digitalWrite(LED2W,HIGH);
+      delay (1000);
+      digitalWrite(LED2W,LOW);      
       irsend.sendRaw(rawDataLBTon, 71,38); 
       delay (200);
       Serial.println(F("Lampu BT"));
@@ -369,6 +442,9 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/LBToff")) {
       myBot.sendMessage(msg.sender.id, "Lampu BT Off");     
       delay (200);
+      digitalWrite(LED2W,HIGH);
+      delay (1000);
+      digitalWrite(LED2W,LOW);      
       irsend.sendRaw(rawDataLBToff, 71,38);
       delay (200);
       Serial.println(F("Lampu BT Off"));
@@ -376,34 +452,145 @@ void loop()
       else if (msg.text.equalsIgnoreCase("/lbtcolor")) {
       myBot.sendMessage(msg.sender.id, "Ganti Warna Lampu BT");     
       delay (200);
+      digitalWrite(LED2W,HIGH);
+      delay (1000);
+      digitalWrite(LED2W,LOW);      
       irsend.sendRaw(rawDataLedYellow, 71,38);
       delay (200);
       Serial.println(F("Ganti Warna Lampu BT"));
     }    
-    
+
+// LED internal Switch
+      else if (msg.text.equalsIgnoreCase("/ledBon")) {
+      myBot.sendMessage(msg.sender.id, "LED Blue On");     
+      delay (100);
+      digitalWrite(LED1B,HIGH);
+      delay (100);
+      Serial.println(F("LED Blue On"));
+    }
+      else if (msg.text.equalsIgnoreCase("/ledBoff")) {
+      myBot.sendMessage(msg.sender.id, "LED Blue Off");     
+      delay (100);
+      digitalWrite(LED1B,LOW); 
+      delay (100);
+      Serial.println(F("LED Blue Off"));
+    }
+      else if (msg.text.equalsIgnoreCase("/ledWon")) {
+      myBot.sendMessage(msg.sender.id, "LED White On");     
+      delay (100);
+      digitalWrite(LED2W,HIGH);
+      delay (100);
+      Serial.println(F("LED White On"));
+    }
+      else if (msg.text.equalsIgnoreCase("/ledWoff")) {
+      myBot.sendMessage(msg.sender.id, "LED White Off");     
+      delay (100);
+      digitalWrite(LED2W,LOW); 
+      delay (100);
+      Serial.println(F("LED White Off"));
+    }
+      else if (msg.text.equalsIgnoreCase("/ledGon")) {
+      myBot.sendMessage(msg.sender.id, "LED Green On");     
+      delay (100);
+      digitalWrite(LED3G,HIGH);
+      delay (100);
+      Serial.println(F("LED Green On"));
+    }
+      else if (msg.text.equalsIgnoreCase("/ledGoff")) {
+      myBot.sendMessage(msg.sender.id, "LED Green Off");     
+      delay (100);
+      digitalWrite(LED3G,LOW); 
+      delay (100);
+      Serial.println(F("LED Green Off"));
+    }    
+// all LED
+      else if (msg.text.equalsIgnoreCase("/ledAllon")) {
+      myBot.sendMessage(msg.sender.id, "LED All On");     
+      delay (100);
+      digitalWrite(LED1B,HIGH);
+      digitalWrite(LED2W,HIGH);            
+      digitalWrite(LED3G,HIGH);
+      delay (100);
+      Serial.println(F("LED All On"));
+    }
+      else if (msg.text.equalsIgnoreCase("/ledAlloff")) {
+      myBot.sendMessage(msg.sender.id, "LED All Off");     
+      delay (100);
+      digitalWrite(LED1B,LOW); 
+      digitalWrite(LED2W,LOW);
+      digitalWrite(LED3G,LOW);
+      delay (100);
+      Serial.println(F("LED All Off"));
+    }
+    // call LedJalan
+      else if (msg.text.equalsIgnoreCase("/ledjalan")) {
+      myBot.sendMessage(msg.sender.id, "LED Jalan 6x");     
+      delay (100);
+      LedJalan();
+      LedJalan();
+      LedJalan();
+      LedJalan();
+      LedJalan();
+      LedJalan();
+      delay (100);
+      Serial.println(F("LED Jalan 6x"));
+    }
+          
 // call functions
       else if (msg.text.equalsIgnoreCase("/ftc")) {
       myBot.sendMessage(msg.sender.id, "Fan to Cold 5 minutes");     
       delay (200);
+      digitalWrite(LED3G,HIGH);
+      delay (1000);
+      digitalWrite(LED3G,LOW); 
       FanToCold();
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Fan to Cold 5 minutes"));
     }
       else if (msg.text.equalsIgnoreCase("/ftc15")) {
       myBot.sendMessage(msg.sender.id, "Fan to Cold 15 minutes");     
       delay (200);
+      digitalWrite(LED3G,HIGH);
+      delay (1000);
+      digitalWrite(LED3G,LOW); 
       FanToColdLM();
       delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
       Serial.println(F("Fan to Cold 15 minutes"));
     }
+
       else if (msg.text.equalsIgnoreCase("/ftc10")) {
       myBot.sendMessage(msg.sender.id, "Fan to Cold 10 minutes");     
       delay (200);
+      digitalWrite(LED3G,HIGH);
+      delay (1000);
+      digitalWrite(LED3G,LOW); 
       FanToColdSM();
       delay (200);
-      Serial.println(F("Fan to Cold 10 minutes"));
+      myBot.sendMessage(msg.sender.id, tempstat);
+      Serial.println(F("Fan to Cold 10 minutes"));      
     }
-    
+
+      else if (msg.text.equalsIgnoreCase("/30ke26")) {
+      myBot.sendMessage(msg.sender.id, "30c to 26c");     
+      delay (100);
+      digitalWrite(LED3G,HIGH);
+      delay (500);
+      digitalWrite(LED3G,LOW);
+      delay (500);
+      digitalWrite(LED2W,HIGH);
+      delay (500);
+      digitalWrite(LED2W,LOW);      
+      TigaKDua();
+      delay (200);
+      digitalWrite(LED1B,HIGH);
+      delay (500);
+      digitalWrite(LED1B,LOW);
+      delay (200);
+      myBot.sendMessage(msg.sender.id, tempstat);
+      Serial.println(F("30c to 26c"));      
+    }        
       else if (msg.text.equalsIgnoreCase("/stabil27")) {
       delay (200);
       myBot.sendMessage(msg.sender.id, tempstat);
@@ -457,6 +644,22 @@ void loop()
 }
   
 //---
+
+/* // not working
+void ulang() {
+  delay (2000);
+  ESP.restart();
+}
+*/
+
+void TigaKDua() {
+  irsend.sendRaw(rawDataFan, 137,38);
+  delay (500);
+  irsend.sendRaw(rawData30c, 137,38);
+  delay (10000); // 10 secs
+  irsend.sendRaw(rawData26c, 137,38);
+}
+
 void FanToCold() {
   irsend.sendRaw(rawDataFan, 137,38);
   delay (5*60000); // 5 mins
@@ -475,6 +678,324 @@ void FanToColdLM() {
   irsend.sendRaw(rawDataCold, 137,38);
 }
 
+void LedJalan() {
+  // led cepet bolak balik
+  // 100ms
+  digitalWrite(LED1B, HIGH);
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  delay(100);
+
+  digitalWrite(LED2W, HIGH);
+  delay(100);
+  digitalWrite(LED2W, LOW);
+  delay(100);
+
+  digitalWrite(LED3G, HIGH);
+  delay(100);
+  digitalWrite(LED3G, LOW);
+  delay(100);
+
+  digitalWrite(LED1B, HIGH);
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  delay(100);
+  
+  digitalWrite(LED2W, HIGH);
+  delay(100);
+  digitalWrite(LED2W, LOW);
+  delay(100);
+
+  digitalWrite(LED3G, HIGH);
+  delay(100);
+  digitalWrite(LED3G, LOW);
+  delay(100);
+
+  // 200ms
+  digitalWrite(LED1B, HIGH);
+  delay(200);
+  digitalWrite(LED1B, LOW);
+  delay(200);
+
+  digitalWrite(LED2W, HIGH);
+  delay(200);
+  digitalWrite(LED2W, LOW);
+  delay(200);
+
+  digitalWrite(LED3G, HIGH);
+  delay(200);
+  digitalWrite(LED3G, LOW);
+  delay(200);
+
+  digitalWrite(LED1B, HIGH);
+  delay(200);
+  digitalWrite(LED1B, LOW);
+  delay(200);
+  
+  digitalWrite(LED2W, HIGH);
+  delay(200);
+  digitalWrite(LED2W, LOW);
+  delay(200);
+
+  digitalWrite(LED3G, HIGH);
+  delay(200);
+  digitalWrite(LED3G, LOW);
+  delay(200);
+
+  // 300ms
+  digitalWrite(LED1B, HIGH);
+  delay(300);
+  digitalWrite(LED1B, LOW);
+  delay(300);
+
+  digitalWrite(LED2W, HIGH);
+  delay(300);
+  digitalWrite(LED2W, LOW);
+  delay(300);
+
+  digitalWrite(LED3G, HIGH);
+  delay(300);
+  digitalWrite(LED3G, LOW);
+  delay(300);
+
+  digitalWrite(LED1B, HIGH);
+  delay(300);
+  digitalWrite(LED1B, LOW);
+  delay(300);
+  
+  digitalWrite(LED2W, HIGH);
+  delay(300);
+  digitalWrite(LED2W, LOW);
+  delay(300);
+
+  digitalWrite(LED3G, HIGH);
+  delay(300);
+  digitalWrite(LED3G, LOW);
+  delay(300);  
+  
+  // solo 100 ms
+  digitalWrite(LED1B, HIGH);
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  delay(100);
+  digitalWrite(LED1B, HIGH);
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  delay(100);  
+  digitalWrite(LED1B, HIGH);
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  delay(100);
+
+  digitalWrite(LED2W, HIGH);
+  delay(100);
+  digitalWrite(LED2W, LOW);
+  delay(100);
+  digitalWrite(LED2W, HIGH);
+  delay(100);
+  digitalWrite(LED2W, LOW);
+  delay(100);  
+  digitalWrite(LED2W, HIGH);
+  delay(100);
+  digitalWrite(LED2W, LOW);
+  delay(100);
+
+  digitalWrite(LED3G, HIGH);
+  delay(100);
+  digitalWrite(LED3G, LOW);
+  delay(100);
+  digitalWrite(LED3G, HIGH);
+  delay(100);
+  digitalWrite(LED3G, LOW);
+  delay(100);  
+  digitalWrite(LED3G, HIGH);
+  delay(100);
+  digitalWrite(LED3G, LOW);
+  delay(100);   
+
+  digitalWrite(LED3G, HIGH);
+  delay(100);
+  digitalWrite(LED3G, LOW);
+  delay(100);
+  digitalWrite(LED3G, HIGH);
+  delay(100);
+  digitalWrite(LED3G, LOW);
+  delay(100);  
+  digitalWrite(LED3G, HIGH);
+  delay(100);
+  digitalWrite(LED3G, LOW);
+  delay(100);
+
+  digitalWrite(LED2W, HIGH);
+  delay(100);
+  digitalWrite(LED2W, LOW);
+  delay(100);
+  digitalWrite(LED2W, HIGH);
+  delay(100);
+  digitalWrite(LED2W, LOW);
+  delay(100);  
+  digitalWrite(LED2W, HIGH);
+  delay(100);
+  digitalWrite(LED2W, LOW);
+  delay(100);
+
+  digitalWrite(LED1B, HIGH);
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  delay(100);
+  digitalWrite(LED1B, HIGH);
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  delay(100);  
+  digitalWrite(LED1B, HIGH);
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  delay(100);
+  
+  // bareng 300-500 ms
+  delay(300);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(300);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(300);
+
+  delay(400);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(400);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(400);
+
+  delay(500);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(500);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(500);
+
+  delay(300);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(300);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(300);
+
+  delay(200);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(200);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(200);
+
+  delay(100);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(100);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(100);
+
+  delay(50);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(50);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(50);
+
+  delay(50);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(50);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(50);
+
+  delay(50);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(50);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(50);
+
+  delay(150);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(150);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(150);
+
+  delay(250);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(250);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(250);       
+}
+
+void LedKedip (){
+  delay(150);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(150);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(150);
+
+  delay(50);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(50);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(50);
+
+  delay(150);  
+  digitalWrite(LED1B, HIGH);
+  digitalWrite(LED2W, HIGH);
+  digitalWrite(LED3G, HIGH);  
+  delay(150);
+  digitalWrite(LED1B, LOW);
+  digitalWrite(LED2W, LOW);  
+  digitalWrite(LED3G, LOW);  
+  delay(150);
+  
+}
 void SuhuBalance27(){
   float tempcek = dht.readTemperature();
   
